@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartMove | Intelligent Bus Journey Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-icon">S</div><div><b>smartmove</b><small>URBAN MOBILITY</small></div></div>
+    <div class="nav-label">WORKSPACE</div>
+    <button class="nav-item active" data-view="overview"><span>▦</span> Overview</button>
+    <button class="nav-item" data-view="journey"><span>⌖</span> Journey planner</button>
+    <button class="nav-item" data-view="traffic"><span>⌁</span> Traffic insights</button>
+    <div class="sidebar-bottom"><div class="live-dot"></div><div><b>Demo network online</b><small>Simulated bus feed</small></div></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar"><div><div class="eyebrow">TUESDAY, 24 NOVEMBER 2026</div><h1 id="page-title">Network overview</h1></div><div class="top-actions"><span class="feed"><i></i> LIVE SIMULATION</span><div class="avatar">SM</div></div></header>
+
+    <section id="overview-view" class="view">
+      <div class="welcome"><div><span class="eyebrow light">DELHI PUBLIC TRANSPORT</span><h2>Your city. In motion.</h2><p>See buses move, understand traffic and plan a smarter journey.</p></div><button class="primary-btn" id="plan-now">＋ Plan a journey</button></div>
+      <div class="stats">
+        <article class="stat-card"><div class="stat-head">Active buses <span class="stat-icon blue">▣</span></div><strong id="active-count">05</strong><small><em class="positive">●</em> Network simulation running</small></article>
+        <article class="stat-card"><div class="stat-head">Routes monitored <span class="stat-icon purple">⌁</span></div><strong id="route-count">04</strong><small>Across the demo network</small></article>
+        <article class="stat-card"><div class="stat-head">Avg. bus speed <span class="stat-icon teal">↗</span></div><strong id="avg-speed">19 <small>km/h</small></strong><small>Updates every 3 seconds</small></article>
+        <article class="stat-card"><div class="stat-head">Traffic alerts <span class="stat-icon orange">!</span></div><strong id="alert-count">02</strong><small>Areas needing attention</small></article>
+      </div>
+      <div class="content-grid">
+        <section class="panel map-panel"><div class="panel-heading"><div><h3>Live bus network</h3><p>Bus positions are simulated for this prototype</p></div><span class="pill live-pill"><i></i> Live</span></div><div id="map"></div><div class="map-legend"><span><i class="legend-bus"></i> Active bus</span><span><i class="legend-stop"></i> Bus stop</span><span><i class="legend-route"></i> Route</span></div></section>
+        <section class="panel traffic-panel"><div class="panel-heading"><div><h3>Traffic conditions</h3><p>Congestion by corridor</p></div><button class="text-btn" data-open="traffic">View all →</button></div><div id="traffic-list" class="traffic-list"></div><div class="insight"><div class="insight-icon">✦</div><div><b>Network insight</b><p>ITO Corridor is currently showing the highest congestion in this demo.</p></div></div></section>
+      </div>
+      <section class="panel table-panel"><div class="panel-heading"><div><h3>Active buses</h3><p>Latest simulated fleet information</p></div><span class="muted" id="last-updated">Updating…</span></div><div class="table-wrap"><table><thead><tr><th>BUS</th><th>ROUTE</th><th>SPEED</th><th>OCCUPANCY</th><th>STATUS</th></tr></thead><tbody id="bus-table"></tbody></table></div></section>
+      <p class="disclaimer">Prototype notice: bus positions, traffic levels and journey estimates are simulated sample data, not official live Delhi Transit information.</p>
+    </section>
+
+    <section id="journey-view" class="view hidden">
+      <div class="section-intro"><span class="eyebrow">TRAVEL WITH CONFIDENCE</span><h2>Plan your journey</h2><p>Compare available demo routes and find a convenient way across the city.</p></div>
+      <div class="planner-layout">
+        <section class="panel planner-card"><h3>Where would you like to go?</h3><p class="subtext">Choose your starting point and destination.</p>
+          <label for="from-stop">FROM</label><select id="from-stop"></select>
+          <div class="swap-line"><span></span><button id="swap-stops" title="Swap locations">⇅</button></div>
+          <label for="to-stop">TO</label><select id="to-stop"></select>
+          <button class="primary-btn full-btn" id="search-journey">Find journeys <span>→</span></button>
+          <div class="planner-note">✦ Journey estimates adapt to the latest simulated traffic conditions.</div>
+        </section>
+        <section class="panel results-card"><div class="panel-heading"><div><h3>Journey options</h3><p id="results-caption">Your route options will appear here.</p></div></div><div id="journey-results" class="empty-state"><div class="empty-icon">⌖</div><b>Ready when you are</b><p>Select two stops to compare journey options.</p></div></section>
+      </div>
+    </section>
+
+    <section id="traffic-view" class="view hidden">
+      <div class="section-intro"><span class="eyebrow">CITY PULSE</span><h2>Traffic insights</h2><p>Understand corridor conditions and how they may affect bus journeys.</p></div>
+      <div class="traffic-summary" id="traffic-summary"></div>
+      <section class="panel"><div class="panel-heading"><div><h3>Corridor congestion</h3><p>Illustrative congestion index from 0–100</p></div><span class="pill">DEMO DATA</span></div><div id="traffic-detail" class="traffic-detail"></div></section>
+      <section class="panel insight-panel"><div class="insight-icon">✦</div><div><h3>What this means for your journey</h3><p>When a corridor is marked heavy, the journey planner increases estimated travel time and may show alternate options. Predictions are illustrative and should be validated with real historical and live feeds before deployment.</p></div></section>
+    </section>
+  </main>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body></html>
